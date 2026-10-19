@@ -76,13 +76,24 @@ class PredictionEngineTests(unittest.TestCase):
         self.database.database_url = "postgresql://example.invalid/database"
         target = Mock()
         inserted_batches = []
+        execute_queries = []
 
         def record_batch(statement, rows):
             rows = list(rows)
             inserted_batches.append((statement, rows))
             return SimpleNamespace(rowcount=len(rows))
 
+        def record_execute(statement, params=()):
+            execute_queries.append((statement, params))
+            cursor = Mock()
+            if "information_schema.columns" in statement:
+                cursor.fetchone.return_value = {
+                    "data_type": "integer" if params[0] == "matches" else "text"
+                }
+            return cursor
+
         target.executemany.side_effect = record_batch
+        target.execute.side_effect = record_execute
         with patch.object(self.database, "_get_conn", return_value=target):
             result = self.database.import_sqlite_database(self.database.db_path)
 
@@ -96,9 +107,34 @@ class PredictionEngineTests(unittest.TestCase):
         self.assertEqual(
             inserted_batches[2][1][0][matchday_index], "Preliminary Round"
         )
-        self.assertEqual(target.execute.call_count, 6)
+        self.assertTrue(any(
+            "pg_advisory_xact_lock" in query for query, _ in execute_queries
+        ))
+        self.assertEqual(
+            sum("ALTER TABLE matches" in query for query, _ in execute_queries), 1
+        )
+        self.assertFalse(any(
+            "ALTER TABLE fixtures" in query for query, _ in execute_queries
+        ))
+        self.assertEqual(len(execute_queries), 10)
         target.commit.assert_called_once()
         target.close.assert_called_once()
+
+    def test_postgres_schema_initialization_does_not_alter_existing_tables(self):
+        database = object.__new__(DatabaseManager)
+        database.database_url = "postgresql://example.invalid/database"
+        database.db_path = Path("unused.db")
+        connection = Mock()
+
+        with patch.object(database, "_get_conn", return_value=connection):
+            database._init_db()
+
+        schema = connection.executescript.call_args.args[0]
+        self.assertEqual(schema.count("matchday TEXT"), 2)
+        self.assertNotIn("ALTER TABLE", schema)
+        connection.execute.assert_not_called()
+        connection.commit.assert_called_once()
+        connection.close.assert_called_once()
 
     def test_postgres_adapter_translates_sqlite_placeholders(self):
         connection = Mock()

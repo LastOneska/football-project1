@@ -194,12 +194,6 @@ class DatabaseManager:
                 )
                 schema = schema.replace("matchday INTEGER", "matchday TEXT")
             conn.executescript(schema)
-            if self.database_url:
-                for table in ("matches", "fixtures"):
-                    conn.execute(
-                        f"ALTER TABLE {table} "
-                        "ALTER COLUMN matchday TYPE TEXT USING matchday::text"
-                    )
             conn.commit()
             logger.info(
                 "Database diinisialisasi: %s",
@@ -574,6 +568,7 @@ class DatabaseManager:
         }
         imported: dict[str, int] = {}
         try:
+            self._migrate_postgres_matchday_columns(target)
             for table, primary_key in tables.items():
                 rows = source.execute(f"SELECT * FROM {table}").fetchall()
                 columns = [
@@ -607,3 +602,25 @@ class DatabaseManager:
         finally:
             source.close()
             target.close()
+
+    def _migrate_postgres_matchday_columns(
+        self, conn: _PostgresConnection
+    ) -> None:
+        """Run the one-time matchday type upgrade under a transaction lock."""
+        conn.execute("SELECT pg_advisory_xact_lock(874302122)")
+        for table in ("matches", "fixtures"):
+            row = conn.execute(
+                """
+                SELECT data_type
+                FROM information_schema.columns
+                WHERE table_schema = current_schema()
+                  AND table_name = ?
+                  AND column_name = 'matchday'
+                """,
+                (table,),
+            ).fetchone()
+            if row and row["data_type"] != "text":
+                conn.execute(
+                    f"ALTER TABLE {table} "
+                    "ALTER COLUMN matchday TYPE TEXT USING matchday::text"
+                )
