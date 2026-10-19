@@ -10,7 +10,14 @@ let visibleTeamCount = window.matchMedia("(max-width: 650px)").matches ? 10 : 40
 
 async function api(url) {
   const response = await fetch(url);
-  const data = await response.json();
+  const body = await response.text();
+  let data;
+  try {
+    data = body ? JSON.parse(body) : null;
+  } catch {
+    const message = body.trim().slice(0, 240) || "Respons server kosong.";
+    throw new Error(`Server mengembalikan respons non-JSON (HTTP ${response.status}): ${message}`);
+  }
   if (!response.ok) throw new Error(data.detail || "Permintaan gagal.");
   return data;
 }
