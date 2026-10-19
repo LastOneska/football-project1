@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/api/app.py": {
+      "maxDuration": 60,
+      "includeFiles": "{models/saved/poisson_model.pkl,web/**}"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/refresh",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}

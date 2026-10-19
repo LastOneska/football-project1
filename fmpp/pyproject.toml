@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "football-match-probability-predictor"
+version = "1.0.0"
+description = "Local football match probability analysis CLI"
+requires-python = ">=3.11,<3.14"
+
+[project.scripts]
+fmpp = "src.cli:app"
+fmpp-web = "src.api.app:run"
+
+[tool.vercel]
+entrypoint = "src.api.app:app"
+
+[tool.setuptools.packages.find]
+include = ["src*"]

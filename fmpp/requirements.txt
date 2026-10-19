@@ -1,0 +1,27 @@
+# Core
+python-dotenv==1.1.0
+pandas==2.2.3
+numpy==2.2.6
+requests==2.32.3
+
+# Database
+psycopg[binary]==3.2.6
+
+# Machine Learning
+scikit-learn==1.5.2
+scipy==1.14.1
+
+# CLI
+typer==0.15.1
+rich==13.9.4
+
+# Web Backend
+fastapi==0.115.6
+uvicorn==0.34.0
+jinja2==3.1.4
+
+# Timezone
+pytz==2024.2
+
+# Utilitas
+tqdm==4.67.1

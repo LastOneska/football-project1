@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Analisis probabilitas pertandingan sepak bola untuk pembelajaran.">
+  <title>FMPP | Football Match Probability Predictor</title>
+  <link rel="stylesheet" href="/static/styles.css?v=mobile-1">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="FMPP halaman utama"><span class="brand-mark">F</span> FMPP</a>
+    <nav aria-label="Navigasi utama">
+      <a href="#jadwal">Jadwal</a>
+      <a href="#teams">Semua Tim</a>
+      <a href="#performa">Performa Model</a>
+    </nav>
+    <span class="local-badge">Lokal · WIB</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">FOOTBALL MATCH PROBABILITY PREDICTOR</p>
+      <h1>Analisis pertandingan<br></h1>
+      <p class="hero-copy">Probabilitas hasil berbasis data historis, form tim, dan model gol Poisson.</p>
+      <a class="primary-link" href="#jadwal">Lihat jadwal <span aria-hidden="true">↓</span></a>
+    </section>
+
+    <section id="jadwal" class="section">
+      <div class="section-heading">
+        <div><p class="eyebrow">PERTANDINGAN</p><h2>Jadwal & prediksi</h2></div>
+        <label class="filter-label">Kompetisi
+          <select id="league-filter"><option value="">Semua kompetisi</option></select>
+        </label>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Pilih hari pertandingan">
+        <button class="tab active" data-day="today" role="tab" aria-selected="true">Malam ini</button>
+        <button class="tab" data-day="tomorrow" role="tab" aria-selected="false">Besok</button>
+        <button class="tab" data-day="dayafter" role="tab" aria-selected="false">Lusa</button>
+      </div>
+      <div id="match-list" class="match-grid" aria-live="polite"></div>
+      <p id="schedule-message" class="message"></p>
+    </section>
+
+    <section id="teams" class="section">
+      <div class="section-heading">
+        <div><p class="eyebrow">FORM DAN HASIL TERDAHULU</p><h2>Riwayat semua tim</h2></div>
+        <label class="filter-label">Cari tim
+          <input id="team-search" type="search" placeholder="Contoh: Barcelona">
+        </label>
+      </div>
+      <p id="team-directory-message" class="message" aria-live="polite"></p>
+      <div id="team-list" class="team-grid" aria-live="polite"></div>
+      <button id="load-more-teams" class="secondary-button" hidden>Muat lebih banyak tim</button>
+    </section>
+
+    <section id="performance" class="section performance-section">
+      <div class="section-heading">
+        <div><p class="eyebrow">EVALUASI WALK-FORWARD</p><h2>Performa model</h2></div>
+        <label class="filter-label">Laga terakhir
+          <select id="evaluation-n">
+            <option value="5">5 laga</option><option value="7">7 laga</option><option value="10">10 laga</option>
+          </select>
+        </label>
+      </div>
+      <button id="load-performance" class="secondary-button">Jalankan evaluasi</button>
+      <p id="performance-message" class="message"></p>
+      <div id="performance-results"></div>
+      <div id="calibration-container" class="performance-panel" hidden>
+        <h3>Kalibrasi Over 2.5 & BTTS · model Poisson</h3>
+        <canvas id="calibration-chart" height="300" aria-label="Grafik kalibrasi probabilitas"></canvas>
+        <p class="message">Garis diagonal menunjukkan kalibrasi sempurna; titik membandingkan probabilitas prediksi dengan frekuensi aktual.</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="prediction-dialog" aria-labelledby="detail-title">
+    <button class="dialog-close" aria-label="Tutup">×</button>
+    <div id="prediction-detail"></div>
+  </dialog>
+
+  <footer>
+    <strong>FMPP</strong>
+    <p>Alat analisis dan pembelajaran. Probabilitas bukan jaminan hasil dan tidak dirancang sebagai dasar keputusan perjudian.</p>
+  </footer>
+  <script src="/static/app.js?v=mobile-1" defer></script>
+</body>
+</html>
